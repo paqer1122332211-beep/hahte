@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاشتي + | Shashaty Plus - مسلسلات وبث مباشر</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts (Cairo & Readex Pro) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- HLS.js for HLS Streaming Support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#E50914',
+                            purple: '#6d28d9',
+                            purpleLight: '#8b5cf6',
+                            gold: '#f59e0b',
+                            dark: '#0f0f13',
+                            card: '#181820',
+                            border: '#2a2a36'
+                        }
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0c0c10;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111116;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b2b38;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6;
+        }
+
+        /* Card Hover Effects */
+        .poster-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .poster-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Glassmorphism UI */
+        .glass-panel {
+            background: rgba(24, 24, 32, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Live Badge Animation */
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+        .live-dot {
+            animation: pulse-red 1.5s infinite ease-in-out;
+        }
+
+        /* Hide Scrollbar utility */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-purple selection:text-white">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 w-full glass-panel border-b border-brand-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-8">
+                    <a href="#" onclick="switchTab('all')" class="flex items-center gap-3 group">
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-purple to-purple-400 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-brand-purple/40 group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-2xl font-black tracking-wider text-white flex items-center gap-1">
+                                شاشتي<span class="text-brand-purpleLight">+</span>
+                            </span>
+                            <span class="text-[10px] text-gray-400 tracking-widest -mt-1 font-semibold">SHASHATY TV</span>
+                        </div>
+                    </a>
+
+                    <!-- Desktop Nav Links -->
+                    <nav class="hidden lg:flex items-center gap-1">
+                        <button onclick="switchTab('all')" id="nav-all" class="nav-btn px-4 py-2 rounded-lg text-sm font-bold text-white bg-brand-purple/20 text-brand-purpleLight border border-brand-purple/30">
+                            <i class="fa-solid fa-border-all ml-2"></i>الرئيسية
+                        </button>
+                        <button onclick="switchTab('live')" id="nav-live" class="nav-btn px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition">
+                            <i class="fa-solid fa-tv ml-2 text-red-500"></i>البث المباشر
+                        </button>
+                        <button onclick="switchTab('iraqi')" id="nav-iraqi" class="nav-btn px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition">
+                            <i class="fa-solid fa-flag ml-2 text-emerald-500"></i>مسلسلات عراقية
+                        </button>
+                        <button onclick="switchTab('turkish_dubbed')" id="nav-turkish_dubbed" class="nav-btn px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition">
+                            <i class="fa-solid fa-language ml-2 text-amber-500"></i>تركية مدبلجة
+                        </button>
+                        <button onclick="switchTab('turkish_sub')" id="nav-turkish_sub" class="nav-btn px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition">
+                            <i class="fa-solid fa-closed-captioning ml-2 text-blue-400"></i>تركية مترجمة
+                        </button>
+                        <button onclick="switchTab('foreign')" id="nav-foreign" class="nav-btn px-4 py-2 rounded-lg text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition">
+                            <i class="fa-solid fa-film ml-2 text-purple-400"></i>مسلسلات أجنبية
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Right Header Actions (Search & Favorites) -->
+                <div class="flex items-center gap-3">
+                    <!-- Search Input -->
+                    <div class="relative hidden sm:block w-64 md:w-80">
+                        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ابحث عن مسلسل، قناة..." 
+                            class="w-full bg-brand-dark/90 border border-brand-border text-gray-200 text-sm rounded-xl py-2.5 pr-10 pl-4 focus:outline-none focus:border-brand-purpleLight transition placeholder-gray-500">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-gray-400 text-sm"></i>
+                    </div>
+
+                    <!-- Favorites Button -->
+                    <button onclick="toggleFavoritesModal()" class="relative p-2.5 rounded-xl bg-brand-card hover:bg-brand-border text-gray-300 hover:text-white transition border border-brand-border">
+                        <i class="fa-solid fa-heart text-lg text-red-500"></i>
+                        <span id="favCount" class="absolute -top-1 -right-1 bg-brand-purple text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-brand-dark">0</span>
+                    </button>
+
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-xl bg-brand-card text-gray-300 hover:text-white border border-brand-border">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Search Bar (under header) -->
+            <div class="sm:hidden pb-4">
+                <div class="relative w-full">
+                    <input type="text" id="searchInputMobile" oninput="handleSearchMobile()" placeholder="ابحث عن مسلسل، قناة..." 
+                        class="w-full bg-brand-dark border border-brand-border text-gray-200 text-sm rounded-xl py-2.5 pr-10 pl-4 focus:outline-none focus:border-brand-purpleLight placeholder-gray-500">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-gray-400 text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobileMenu" class="hidden lg:hidden border-t border-brand-border bg-brand-card/95 backdrop-blur-xl px-4 py-4 space-y-2">
+            <button onclick="switchTab('all'); toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-lg font-bold text-white bg-brand-purple/20 flex items-center gap-3">
+                <i class="fa-solid fa-border-all text-brand-purpleLight"></i> الرئيسية
+            </button>
+            <button onclick="switchTab('live'); toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-lg font-bold text-gray-300 hover:bg-white/5 flex items-center gap-3">
+                <i class="fa-solid fa-tv text-red-500"></i> البث المباشر (beIN + العراقية)
+            </button>
+            <button onclick="switchTab('iraqi'); toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-lg font-bold text-gray-300 hover:bg-white/5 flex items-center gap-3">
+                <i class="fa-solid fa-flag text-emerald-500"></i> مسلسلات عراقية
+            </button>
+            <button onclick="switchTab('turkish_dubbed'); toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-lg font-bold text-gray-300 hover:bg-white/5 flex items-center gap-3">
+                <i class="fa-solid fa-language text-amber-500"></i> مسلسلات تركية مدبلجة
+            </button>
+            <button onclick="switchTab('turkish_sub'); toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-lg font-bold text-gray-300 hover:bg-white/5 flex items-center gap-3">
+                <i class="fa-solid fa-closed-captioning text-blue-400"></i> مسلسلات تركية مترجمة
+            </button>
+            <button onclick="switchTab('foreign'); toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-lg font-bold text-gray-300 hover:bg-white/5 flex items-center gap-3">
+                <i class="fa-solid fa-film text-purple-400"></i> مسلسلات أجنبية
+            </button>
+        </div>
+    </header>
+
+    <!-- HERO FEATURED SECTION (Only visible on All tab) -->
+    <section id="heroSection" class="relative w-full h-[480px] sm:h-[550px] overflow-hidden bg-gradient-to-t from-brand-dark via-brand-dark/40 to-transparent">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1600&auto=format&fit=crop" 
+                 alt="Hero Banner" class="w-full h-full object-cover opacity-35 scale-105 transform filter blur-xs">
+            <div class="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/80 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-brand-dark/40"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+            <div class="max-w-2xl space-y-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 bg-red-600 text-white text-xs font-black rounded-md tracking-wider">مباشر الآن</span>
+                    <span class="px-3 py-1 bg-brand-purple/80 text-white text-xs font-bold rounded-md">أعلى المشاهدات</span>
+                    <span class="text-amber-400 text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-star"></i> 9.6</span>
+                </div>
+                <h1 class="text-4xl sm:text-6xl font-black text-white leading-tight tracking-wide drop-shadow-md">
+                    خان الذهب - الموسم 2
+                </h1>
+                <p class="text-gray-300 text-sm sm:text-base line-clamp-3 leading-relaxed">
+                    دراما عراقية مشوقة تدور أحداثها بين أزقة بغداد القديمة، حيث تتطرق إلى قضايا اجتماعية وصراعات عائلية بين الحب والانتقام والتضحية.
+                </p>
+                <div class="flex items-center gap-4 pt-2">
+                    <button onclick="openSeriesModal('iraqi_1')" class="px-6 py-3.5 bg-gradient-to-r from-brand-purple to-purple-600 hover:from-purple-600 hover:to-brand-purple text-white font-bold rounded-xl shadow-lg shadow-brand-purple/40 flex items-center gap-2 transition transform hover:scale-105">
+                        <i class="fa-solid fa-play"></i> مشاهدة الحلقة الأخيرة
+                    </button>
+                    <button onclick="switchTab('live')" class="px-6 py-3.5 bg-brand-card/90 hover:bg-brand-border text-white font-bold rounded-xl border border-brand-border flex items-center gap-2 transition">
+                        <i class="fa-solid fa-tv text-red-500"></i> القنوات المباشرة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+
+        <!-- CATEGORY QUICK FILTERS (Horizontal Scroll) -->
+        <div class="flex items-center justify-between mb-8 overflow-x-auto no-scrollbar py-2 border-b border-brand-border/60">
+            <div class="flex items-center gap-3 min-w-max">
+                <button onclick="switchTab('all')" class="cat-chip active font-bold text-sm px-5 py-2.5 rounded-full bg-brand-purple text-white border border-brand-purpleLight/40 shadow-sm transition">الكل</button>
+                <button onclick="switchTab('live')" class="cat-chip font-bold text-sm px-5 py-2.5 rounded-full bg-brand-card text-gray-300 hover:text-white border border-brand-border hover:border-brand-purpleLight transition">🔴 بث مباشر</button>
+                <button onclick="switchTab('iraqi')" class="cat-chip font-bold text-sm px-5 py-2.5 rounded-full bg-brand-card text-gray-300 hover:text-white border border-brand-border hover:border-brand-purpleLight transition">🇮🇶 مسلسلات عراقية</button>
+                <button onclick="switchTab('turkish_dubbed')" class="cat-chip font-bold text-sm px-5 py-2.5 rounded-full bg-brand-card text-gray-300 hover:text-white border border-brand-border hover:border-brand-purpleLight transition">🇹🇷 تركية مدبلجة</button>
+                <button onclick="switchTab('turkish_sub')" class="cat-chip font-bold text-sm px-5 py-2.5 rounded-full bg-brand-card text-gray-300 hover:text-white border border-brand-border hover:border-brand-purpleLight transition">🇹🇷 تركية مترجمة</button>
+                <button onclick="switchTab('foreign')" class="cat-chip font-bold text-sm px-5 py-2.5 rounded-full bg-brand-card text-gray-300 hover:text-white border border-brand-border hover:border-brand-purpleLight transition">🌎 مسلسلات أجنبية</button>
+            </div>
+        </div>
+
+        <!-- SECTION 1: LIVE TV CHANNELS (STREAM PLAYER + GRID) -->
+        <section id="liveSection" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-red-600 live-dot"></span>
+                    <h2 class="text-2xl font-black text-white tracking-wide">البث المباشر والقنوات</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="filterLiveChannels('all')" class="px-3 py-1 rounded-lg text-xs font-bold bg-brand-purple/20 text-brand-purpleLight border border-brand-purple/30">الكل</button>
+                    <button onclick="filterLiveChannels('bein')" class="px-3 py-1 rounded-lg text-xs font-bold bg-brand-card text-gray-400 hover:text-white border border-brand-border">beIN Sports</button>
+                    <button onclick="filterLiveChannels('iraqi')" class="px-3 py-1 rounded-lg text-xs font-bold bg-brand-card text-gray-400 hover:text-white border border-brand-border">القنوات العراقية</button>
+                </div>
+            </div>
+
+            <!-- LIVE PLAYER WINDOW CONTAINER -->
+            <div class="mb-8 rounded-2xl overflow-hidden glass-panel border border-brand-border p-4 shadow-2xl">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Player Box -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="relative aspect-video bg-black rounded-xl overflow-hidden shadow-inner border border-white/5 group">
+                            <!-- Video Element -->
+                            <video id="liveVideoPlayer" class="w-full h-full object-contain" controls poster="https://images.unsplash.com/photo-1593784991095-a205069470b6?q=80&w=1200&auto=format&fit=crop">
+                                <source src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" type="application/x-mpegURL">
+                                متصفحك لا يدعم تشغيل هذا البث.
+                            </video>
+
+                            <!-- Overlay Channel Badge -->
+                            <div class="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2 text-xs font-bold text-white">
+                                <span class="w-2 h-2 rounded-full bg-red-500 live-dot"></span>
+                                <span id="activeChannelTitle">beIN SPORTS HD 1</span>
+                            </div>
+                        </div>
+
+                        <!-- Player Controls Bar / Status -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 p-3 bg-brand-dark/80 rounded-xl border border-brand-border text-xs">
+                            <div class="flex items-center gap-3">
+                                <span class="text-emerald-400 font-bold flex items-center gap-1.5">
+                                    <i class="fa-solid fa-signal"></i> الحالة: ممتازة (HD)
+                                </span>
+                                <span class="text-gray-500">|</span>
+                                <span id="activeChannelCategory" class="text-gray-300">رياضة مباشر</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-400">السيرفر:</span>
+                                <select id="serverSelect" onchange="changeLiveServer()" class="bg-brand-card border border-brand-border text-gray-200 rounded px-2 py-1 focus:outline-none text-xs">
+                                    <option value="1">سيرفر رئيسي (FHD)</option>
+                                    <option value="2">سيرفر احتياطي (HD)</option>
+                                    <option value="3">سيرفر 3 (السرعة الضعيفة)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Channel List Selector Side-Panel -->
+                    <div class="flex flex-col h-[350px] lg:h-auto">
+                        <div class="text-sm font-bold text-gray-300 mb-3 flex items-center justify-between">
+                            <span>اختر القناة للمشاهدة:</span>
+                            <span class="text-xs text-brand-purpleLight font-normal" id="channelCount">9 قنوات متوفرة</span>
+                        </div>
+                        <div id="liveChannelsGrid" class="flex-grow overflow-y-auto pr-1 space-y-2.5 max-h-[380px]">
+                            <!-- Channels dynamically populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: IRAQI SERIES (مسلسلات عراقية) -->
+        <section id="iraqiSection" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-emerald-500 text-xl"><i class="fa-solid fa-flag"></i></span>
+                    <h2 class="text-2xl font-black text-white tracking-wide">مسلسلات عراقية</h2>
+                </div>
+                <button onclick="switchTab('iraqi')" class="text-sm font-bold text-brand-purpleLight hover:underline">عرض الكل <i class="fa-solid fa-chevron-left text-xs mr-1"></i></button>
+            </div>
+            <div id="iraqiGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                <!-- Dynamically Populated -->
+            </div>
+        </section>
+
+        <!-- SECTION 3: TURKISH DUBBED (مسلسلات تركية مدبلجة) -->
+        <section id="turkishDubbedSection" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-amber-500 text-xl"><i class="fa-solid fa-language"></i></span>
+                    <h2 class="text-2xl font-black text-white tracking-wide">مسلسلات تركية مدبلجة للعربية</h2>
+                </div>
+                <button onclick="switchTab('turkish_dubbed')" class="text-sm font-bold text-brand-purpleLight hover:underline">عرض الكل <i class="fa-solid fa-chevron-left text-xs mr-1"></i></button>
+            </div>
+            <div id="turkishDubbedGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                <!-- Dynamically Populated -->
+            </div>
+        </section>
+
+        <!-- SECTION 4: TURKISH SUBTITLED (مسلسلات تركية مترجمة) -->
+        <section id="turkishSubSection" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-blue-400 text-xl"><i class="fa-solid fa-closed-captioning"></i></span>
+                    <h2 class="text-2xl font-black text-white tracking-wide">مسلسلات تركية مترجمة (أصلية)</h2>
+                </div>
+                <button onclick="switchTab('turkish_sub')" class="text-sm font-bold text-brand-purpleLight hover:underline">عرض الكل <i class="fa-solid fa-chevron-left text-xs mr-1"></i></button>
+            </div>
+            <div id="turkishSubGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                <!-- Dynamically Populated -->
+            </div>
+        </section>
+
+        <!-- SECTION 5: FOREIGN SERIES (مسلسلات أجنبية) -->
+        <section id="foreignSection" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-purple-400 text-xl"><i class="fa-solid fa-film"></i></span>
+                    <h2 class="text-2xl font-black text-white tracking-wide">مسلسلات أجنبية هوليوود وعالمية</h2>
+                </div>
+                <button onclick="switchTab('foreign')" class="text-sm font-bold text-brand-purpleLight hover:underline">عرض الكل <i class="fa-solid fa-chevron-left text-xs mr-1"></i></button>
+            </div>
+            <div id="foreignGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                <!-- Dynamically Populated -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-brand-border mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-4">
+            <div class="flex items-center justify-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-brand-purple flex items-center justify-center text-white font-bold">
+                    <i class="fa-solid fa-play text-xs"></i>
+                </div>
+                <span class="text-xl font-black text-white">شاشتي<span class="text-brand-purpleLight">+</span></span>
+            </div>
+            <p class="text-gray-400 text-sm max-w-xl mx-auto">
+                منصة مشاهدة المسلسلات البث المباشر الأولى - تجميع للمسلسلات العراقية، التركية والأجنبية وأقوى قنوات الرياضة والأخبار.
+            </p>
+            <div class="flex justify-center gap-6 text-gray-400 text-lg">
+                <a href="#" class="hover:text-brand-purpleLight transition"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="hover:text-brand-purpleLight transition"><i class="fa-brands fa-telegram"></i></a>
+                <a href="#" class="hover:text-brand-purpleLight transition"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="hover:text-brand-purpleLight transition"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+            <div class="text-xs text-gray-500 pt-4 border-t border-brand-border/40">
+                جميع الحقوق محفوظة &copy; 2026 - شاشتي Shashaty Media Network
+            </div>
+        </div>
+    </footer>
+
+    <!-- SERIES / EPISODES DETAILS MODAL -->
+    <div id="seriesModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-brand-card border border-brand-border rounded-2xl shadow-2xl overflow-hidden my-8 transform transition-all">
+            
+            <!-- Close Button -->
+            <button onclick="closeSeriesModal()" class="absolute top-4 left-4 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center transition border border-white/10">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Modal Banner & Title Block -->
+            <div class="relative h-64 sm:h-80 w-full">
+                <img id="modalCover" src="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-card via-brand-card/60 to-transparent"></div>
+                <div class="absolute bottom-6 right-6 left-6 flex items-end justify-between">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span id="modalBadge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-brand-purple text-white">تصنيف</span>
+                            <span id="modalYear" class="text-gray-300 text-xs">2024</span>
+                            <span id="modalRating" class="text-amber-400 text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-star"></i> 9.0</span>
+                        </div>
+                        <h2 id="modalTitle" class="text-3xl sm:text-4xl font-black text-white">عنوان المسلسل</h2>
+                    </div>
+                    <button id="modalFavBtn" onclick="" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold border border-white/10 flex items-center gap-2 transition">
+                        <i class="fa-regular fa-heart"></i> المفضلة
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content & Episodes Explorer -->
+            <div class="p-6 space-y-6">
+                <!-- Synopsis -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-400 mb-1">قصة المسلسل:</h3>
+                    <p id="modalSynopsis" class="text-gray-200 text-sm leading-relaxed">وصف تفصيلي عن قصة المسلسل والأحداث مشوقة...</p>
+                </div>
+
+                <!-- Active Episode Video Player -->
+                <div class="space-y-3 border-t border-brand-border pt-4">
+                    <div class="flex items-center justify-between">
+                        <h3 id="currentPlayingEpisodeTitle" class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-play text-brand-purpleLight"></i> تشغيل الحلقة 1
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400">السيرفر:</span>
+                            <select class="bg-brand-dark border border-brand-border text-gray-200 text-xs rounded px-2 py-1">
+                                <option>سيرفر VIP 1</option>
+                                <option>سيرفر سريع 2</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="relative aspect-video bg-black rounded-xl overflow-hidden border border-white/10 shadow-lg">
+                        <video id="episodeVideoPlayer" controls class="w-full h-full object-contain" poster="">
+                            <source id="episodeVideoSource" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                            متصفحك لا يدعم تشغيل الفيديو.
+                        </video>
+                    </div>
+                </div>
+
+                <!-- Episodes List Grid -->
+                <div class="space-y-3">
+                    <h3 class="text-base font-bold text-white">قائمة الحلقات:</h3>
+                    <div id="modalEpisodesGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-48 overflow-y-auto pr-1">
+                        <!-- Episode buttons dynamically loaded -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAVORITES MODAL -->
+    <div id="favModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="relative w-full max-w-2xl bg-brand-card border border-brand-border rounded-2xl p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-6 pb-3 border-b border-brand-border">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-heart text-red-500"></i> قائمة المفضلة
+                </h3>
+                <button onclick="toggleFavoritesModal()" class="text-gray-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="favListContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
+                <!-- Favorites list dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION JAVASCRIPT CODE -->
+    <script>
+        /* ==========================================================================
+           DATA STORE: LIVE TV & SERIES DATABASE
+           ========================================================================== */
+        
+        const liveChannelsData = [
+            {
+                id: 'bein1',
+                name: 'beIN SPORTS HD 1',
+                category: 'bein',
+                categoryLabel: 'رياضة عالمية',
+                logo: 'https://placehold.co/120x80/6d28d9/ffffff?text=beIN+1',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'bein2',
+                name: 'beIN SPORTS HD 2',
+                category: 'bein',
+                categoryLabel: 'دوري أبطال أوروبا',
+                logo: 'https://placehold.co/120x80/6d28d9/ffffff?text=beIN+2',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'bein_news',
+                name: 'beIN SPORTS الاخبارية',
+                category: 'bein',
+                categoryLabel: 'أخبار رياضية',
+                logo: 'https://placehold.co/120x80/4c1d95/ffffff?text=beIN+News',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'iraqia_general',
+                name: 'العراقية العامة HD',
+                category: 'iraqi',
+                categoryLabel: 'قناة رسمية',
+                logo: 'https://placehold.co/120x80/047857/ffffff?text=العراقية',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'iraqia_news',
+                name: 'العراقية الإخبارية',
+                category: 'iraqi',
+                categoryLabel: 'أخبار وتغطيات',
+                logo: 'https://placehold.co/120x80/065f46/ffffff?text=الإخبارية',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'iraqia_sports',
+                name: 'العراقية الرياضية HD',
+                category: 'iraqi',
+                categoryLabel: 'الدوري العراقي الممتاز',
+                logo: 'https://placehold.co/120x80/047857/ffffff?text=الرياضية',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'dijlah',
+                name: 'قناة دجلة الفضائية',
+                category: 'iraqi',
+                categoryLabel: 'منوعات ومسلسلات',
+                logo: 'https://placehold.co/120x80/b45309/ffffff?text=دجلة',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'al_sharqiya',
+                name: 'قناة الشرقية HD',
+                category: 'iraqi',
+                categoryLabel: 'برامج ومسلسلات',
+                logo: 'https://placehold.co/120x80/1e40af/ffffff?text=الشرقية',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            },
+            {
+                id: 'alsumaria',
+                name: 'السومرية الفضائية',
+                category: 'iraqi',
+                categoryLabel: 'مسلسلات وأخبار',
+                logo: 'https://placehold.co/120x80/991b1b/ffffff?text=السومرية',
+                streamUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            }
+        ];
+
+        const seriesDatabase = [
+            // --- IRAQI SERIES ---
+            {
+                id: 'iraqi_1',
+                title: 'خان الذهب 2',
+                category: 'iraqi',
+                categoryLabel: 'عراقي',
+                rating: '9.6',
+                year: '2024',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'تدور الأحداث حول صراعات العائلات البغدادية والتجار في خاني الذهب والتجار العراقيين مع حبكة درامية مليئة بالتشويق والرومانسية والمفاجآت.',
+                episodesCount: 30,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            },
+            {
+                id: 'iraqi_2',
+                title: 'حامض حلو - الموسم 5',
+                category: 'iraqi',
+                categoryLabel: 'عراقي كوميدي',
+                rating: '8.9',
+                year: '2024',
+                quality: 'HD',
+                poster: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'مشاهد كوميدية سريعة تطرح مواقف من الشارع العراقي بقالب ضاحك ومميز يعكس الحياة اليومية للأسر العراقية.',
+                episodesCount: 30,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+            },
+            {
+                id: 'iraqi_3',
+                title: 'المتمرد',
+                category: 'iraqi',
+                categoryLabel: 'عراقي دراما',
+                rating: '9.1',
+                year: '2023',
+                quality: 'HD',
+                poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'شاب عراقي مكافح ينشأ في بيئة شعبية صعبة ويحاول التغلب على عقبات الحياة وتحقيق أحلامه بين التحديات والظلم.',
+                episodesCount: 24,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
+            },
+            {
+                id: 'iraqi_4',
+                title: 'عالم ست وهيبة - الجزء 2',
+                category: 'iraqi',
+                categoryLabel: 'عراقي إثارة',
+                rating: '9.4',
+                year: '2024',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'استكمال للمسلسل الشهير الذي يرصد التحولات الاجتماعية والاحداث المثيرة بعد سنوات طويلة.',
+                episodesCount: 30,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'
+            },
+
+            // --- TURKISH DUBBED ---
+            {
+                id: 'turk_dub_1',
+                title: 'طائر الرفراف (الفريد)',
+                category: 'turkish_dubbed',
+                categoryLabel: 'تركية مدبلجة',
+                rating: '9.5',
+                year: '2023',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1518676599602-2170de9df05d?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'تدور القصة حول الفتى المدلل "فريد" الذي يقرر جده تزويجه من فتاة من مسقط رأسه لتهذيب سلوكه، لتبدأ صراعات غير متوقعة.',
+                episodesCount: 75,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4'
+            },
+            {
+                id: 'turk_dub_2',
+                title: 'شراب التوت البري',
+                category: 'turkish_dubbed',
+                categoryLabel: 'تركية مدبلجة',
+                rating: '9.2',
+                year: '2024',
+                quality: 'HD',
+                poster: 'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'قصة حب بين شخصين ينتميان لثقافتين وعائلتين تختلفان تماماً في النظرة للحياة والتقاليد الاجتماعية.',
+                episodesCount: 60,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4'
+            },
+            {
+                id: 'turk_dub_3',
+                title: 'الأمانة',
+                category: 'turkish_dubbed',
+                categoryLabel: 'تركية مدبلجة',
+                rating: '8.8',
+                year: '2023',
+                quality: 'HD',
+                poster: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'قصة الفتاة "سحر" التي تسعى لحماية ابن أختها اليتيم في مواجهة عائلة قاسية ورجل أعمال صارم.',
+                episodesCount: 120,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4'
+            },
+
+            // --- TURKISH SUBTITLED ---
+            {
+                id: 'turk_sub_1',
+                title: 'المؤسس عثمان - الموسم 5',
+                category: 'turkish_sub',
+                categoryLabel: 'تركية مترجمة',
+                rating: '9.8',
+                year: '2024',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'تاريخ تأسيس الدولة العثمانية ومعارك الغازي عثمان بن أرطغرل ضد المغول والبيزنطيين لبناء الدولة.',
+                episodesCount: 150,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4'
+            },
+            {
+                id: 'turk_sub_2',
+                title: 'حجر المنارة (Taş Kağıt Makas)',
+                category: 'turkish_sub',
+                categoryLabel: 'تركية مترجمة',
+                rating: '9.0',
+                year: '2024',
+                quality: 'HD',
+                poster: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'شاب يمتلك ذاكرة خارقة يحارب نظام العدالة الفاسد لإثبات براءة والده المصاب بالألزهايمر.',
+                episodesCount: 18,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreet.mp4'
+            },
+            {
+                id: 'turk_sub_3',
+                title: 'عديم الرحمة (Gaddar)',
+                category: 'turkish_sub',
+                categoryLabel: 'تركية مترجمة',
+                rating: '9.3',
+                year: '2024',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'يعود "داغان" من الخدمة العسكرية ليتفاجأ بتفكك عائلته واختفاء حبيبته، فيتحول إلى شخص قاسي في عالم الجريمة.',
+                episodesCount: 20,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4'
+            },
+
+            // --- FOREIGN SERIES ---
+            {
+                id: 'foreign_1',
+                title: 'House of the Dragon',
+                category: 'foreign',
+                categoryLabel: 'أجنبي أصلية',
+                rating: '9.7',
+                year: '2024',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1568832359672-e36cf5d74f54?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'الصراع الملحمي والتاريخي لآل تارغارين وحرب رقصة التنانين الأهلية قبل أحداث صراع العروش بـ 200 عام.',
+                episodesCount: 10,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4'
+            },
+            {
+                id: 'foreign_2',
+                title: 'The Last of Us',
+                category: 'foreign',
+                categoryLabel: 'أجنبي أكشن',
+                rating: '9.4',
+                year: '2023',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'رحلة جويل وإيلي عبر الولايات المتحدة المدمّرة بعد تفشي وباء فطري خطير في ملحمة للبقاء والوفاء.',
+                episodesCount: 9,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4'
+            },
+            {
+                id: 'foreign_3',
+                title: 'Breaking Bad',
+                category: 'foreign',
+                categoryLabel: 'أجنبي جريمة',
+                rating: '9.9',
+                year: '2013',
+                quality: '4K',
+                poster: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=600&auto=format&fit=crop',
+                synopsis: 'معلم كيمياء يشخص بمرض السرطان فيتحول إلى عالم التجارة والممنوعات لتأمين مستقبل عائلته.',
+                episodesCount: 62,
+                sampleStream: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            }
+        ];
+
+        /* ==========================================================================
+           APP STATE & LOCAL STORAGE
+           ========================================================================== */
+        let activeTab = 'all';
+        let favoritesList = JSON.parse(localStorage.getItem('shashaty_favorites')) || [];
+        let currentSeriesModal = null;
+        let hlsPlayer = null;
+
+        /* ==========================================================================
+           INITIALIZATION & RENDER FUNCTIONS
+           ========================================================================== */
+        window.onload = function() {
+            renderAllSections();
+            renderLiveChannels(liveChannelsData);
+            updateFavCountBadge();
+            initHlsPlayer(liveChannelsData[0].streamUrl);
+        };
+
+        // Render Cards Grid for a series category
+        function createSeriesCardHTML(item) {
+            const isFav = favoritesList.some(fav => fav.id === item.id);
+            return `
+                <div class="poster-card relative group rounded-2xl overflow-hidden bg-brand-card border border-brand-border cursor-pointer flex flex-col justify-between" onclick="openSeriesModal('${item.id}')">
+                    <!-- Poster Image & Overlay -->
+                    <div class="relative aspect-[2/3] w-full overflow-hidden bg-black/40">
+                        <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover transition transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-card via-transparent to-transparent opacity-80 group-hover:opacity-40 transition"></div>
+                        
+                        <!-- Badges -->
+                        <div class="absolute top-3 right-3 flex flex-col gap-1 items-end">
+                            <span class="px-2 py-0.5 bg-brand-purple/90 text-white font-bold text-[10px] rounded backdrop-blur-md shadow-md">${item.quality}</span>
+                        </div>
+
+                        <button onclick="event.stopPropagation(); toggleFavorite('${item.id}')" class="absolute top-3 left-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center border border-white/10 hover:bg-red-600 transition">
+                            <i class="${isFav ? 'fa-solid text-red-500' : 'fa-regular'} fa-heart text-xs"></i>
+                        </button>
+
+                        <!-- Play Button Overlay -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 bg-brand-purple/20 backdrop-blur-xs">
+                            <div class="w-12 h-12 rounded-full bg-brand-purple text-white flex items-center justify-center shadow-xl shadow-brand-purple/50 transform group-hover:scale-110 transition">
+                                <i class="fa-solid fa-play text-lg ml-0.5"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Box -->
+                    <div class="p-3.5 space-y-1">
+                        <div class="flex items-center justify-between text-xs text-gray-400">
+                            <span>${item.year}</span>
+                            <span class="text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-star text-[10px]"></i> ${item.rating}</span>
+                        </div>
+                        <h3 class="font-bold text-white text-sm sm:text-base line-clamp-1 group-hover:text-brand-purpleLight transition">${item.title}</h3>
+                        <p class="text-[11px] text-gray-400">${item.categoryLabel} • ${item.episodesCount} حلقة</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render All Grids
+        function renderAllSections() {
+            const iraqiItems = seriesDatabase.filter(s => s.category === 'iraqi');
+            const turkDubItems = seriesDatabase.filter(s => s.category === 'turkish_dubbed');
+            const turkSubItems = seriesDatabase.filter(s => s.category === 'turkish_sub');
+            const foreignItems = seriesDatabase.filter(s => s.category === 'foreign');
+
+            document.getElementById('iraqiGrid').innerHTML = iraqiItems.map(createSeriesCardHTML).join('');
+            document.getElementById('turkishDubbedGrid').innerHTML = turkDubItems.map(createSeriesCardHTML).join('');
+            document.getElementById('turkishSubGrid').innerHTML = turkSubItems.map(createSeriesCardHTML).join('');
+            document.getElementById('foreignGrid').innerHTML = foreignItems.map(createSeriesCardHTML).join('');
+        }
+
+        /* ==========================================================================
+           LIVE TV PLAYER LOGIC
+           ========================================================================== */
+        function renderLiveChannels(channels) {
+            const container = document.getElementById('liveChannelsGrid');
+            document.getElementById('channelCount').textContent = `${channels.length} قناة متوفرة`;
+            
+            container.innerHTML = channels.map((ch, index) => `
+                <div onclick="playLiveChannel('${ch.id}')" class="channel-card flex items-center justify-between p-3 rounded-xl bg-brand-dark/90 hover:bg-brand-purple/20 border border-brand-border hover:border-brand-purpleLight/40 cursor-pointer transition group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-brand-card flex items-center justify-center font-bold text-xs text-brand-purpleLight border border-brand-border group-hover:scale-105 transition">
+                            <i class="fa-solid fa-tv"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-brand-purpleLight transition">${ch.name}</h4>
+                            <p class="text-[11px] text-gray-400">${ch.categoryLabel}</p>
+                        </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded bg-red-600/20 text-red-500 font-bold text-[10px] flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500 live-dot"></span> مباشر
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function filterLiveChannels(cat) {
+            if (cat === 'all') {
+                renderLiveChannels(liveChannelsData);
+            } else {
+                const filtered = liveChannelsData.filter(c => c.category === cat);
+                renderLiveChannels(filtered);
+            }
+        }
+
+        function playLiveChannel(channelId) {
+            const ch = liveChannelsData.find(c => c.id === channelId);
+            if (!ch) return;
+
+            document.getElementById('activeChannelTitle').textContent = ch.name;
+            document.getElementById('activeChannelCategory').textContent = ch.categoryLabel;
+
+            initHlsPlayer(ch.streamUrl);
+        }
+
+        function initHlsPlayer(streamUrl) {
+            const video = document.getElementById('liveVideoPlayer');
+            
+            if (Hls.isSupported()) {
+                if (hlsPlayer) {
+                    hlsPlayer.destroy();
+                }
+                hlsPlayer = new Hls();
+                hlsPlayer.loadSource(streamUrl);
+                hlsPlayer.attachMedia(video);
+                hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(e => console.log("Autoplay blocked"));
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+                video.play().catch(e => console.log("Autoplay blocked"));
+            }
+        }
+
+        function changeLiveServer() {
+            const selectedVal = document.getElementById('serverSelect').value;
+            // Switch stream demo based on server choice
+            const demoStreams = [
+                'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+                'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+            ];
+            const url = demoStreams[(parseInt(selectedVal) - 1) % demoStreams.length];
+            initHlsPlayer(url);
+        }
+
+        /* ==========================================================================
+           TAB NAVIGATION & FILTERING
+           ========================================================================== */
+        function switchTab(tabKey) {
+            activeTab = tabKey;
+
+            // Highlight Category Buttons
+            document.querySelectorAll('.cat-chip').forEach(btn => {
+                btn.classList.remove('bg-brand-purple', 'text-white');
+                btn.classList.add('bg-brand-card', 'text-gray-300');
+            });
+
+            // Toggle Section Visibility
+            const sections = ['liveSection', 'iraqiSection', 'turkishDubbedSection', 'turkishSubSection', 'foreignSection'];
+            const hero = document.getElementById('heroSection');
+
+            if (tabKey === 'all') {
+                hero.style.display = 'block';
+                sections.forEach(id => document.getElementById(id).style.display = 'block');
+            } else {
+                hero.style.display = 'none';
+                sections.forEach(id => document.getElementById(id).style.display = 'none');
+
+                if (tabKey === 'live') document.getElementById('liveSection').style.display = 'block';
+                if (tabKey === 'iraqi') document.getElementById('iraqiSection').style.display = 'block';
+                if (tabKey === 'turkish_dubbed') document.getElementById('turkishDubbedSection').style.display = 'block';
+                if (tabKey === 'turkish_sub') document.getElementById('turkishSubSection').style.display = 'block';
+                if (tabKey === 'foreign') document.getElementById('foreignSection').style.display = 'block';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ==========================================================================
+           SEARCH FUNCTIONALITY
+           ========================================================================== */
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            executeSearch(query);
+        }
+
+        function handleSearchMobile() {
+            const query = document.getElementById('searchInputMobile').value.toLowerCase().trim();
+            executeSearch(query);
+        }
+
+        function executeSearch(query) {
+            if (!query) {
+                renderAllSections();
+                return;
+            }
+
+            const filteredSeries = seriesDatabase.filter(s => 
+                s.title.toLowerCase().includes(query) || 
+                s.categoryLabel.toLowerCase().includes(query)
+            );
+
+            // Hide Hero during active search
+            document.getElementById('heroSection').style.display = 'none';
+
+            // Show results in Iraq Grid and hide others for seamless UI
+            document.getElementById('liveSection').style.display = 'none';
+            document.getElementById('turkishDubbedSection').style.display = 'none';
+            document.getElementById('turkishSubSection').style.display = 'none';
+            document.getElementById('foreignSection').style.display = 'none';
+
+            const iraqiSection = document.getElementById('iraqiSection');
+            iraqiSection.style.display = 'block';
+            
+            const grid = document.getElementById('iraqiGrid');
+            if (filteredSeries.length > 0) {
+                grid.innerHTML = filteredSeries.map(createSeriesCardHTML).join('');
+            } else {
+                grid.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-gray-400 space-y-3">
+                        <i class="fa-solid fa-film text-4xl text-gray-600"></i>
+                        <p class="font-bold text-lg">لم يتم العثور على أي نتائج تطابق "${query}"</p>
+                    </div>
+                `;
+            }
+        }
+
+        /* ==========================================================================
+           SERIES MODAL & EPISODES PLAYER
+           ========================================================================== */
+        function openSeriesModal(seriesId) {
+            const series = seriesDatabase.find(s => s.id === seriesId);
+            if (!series) return;
+
+            currentSeriesModal = series;
+
+            document.getElementById('modalTitle').textContent = series.title;
+            document.getElementById('modalCover').src = series.poster;
+            document.getElementById('modalBadge').textContent = series.categoryLabel;
+            document.getElementById('modalYear').textContent = series.year;
+            document.getElementById('modalRating').innerHTML = `<i class="fa-solid fa-star text-amber-400"></i> ${series.rating}`;
+            document.getElementById('modalSynopsis').textContent = series.synopsis;
+
+            // Load Episodes Buttons
+            const episodesGrid = document.getElementById('modalEpisodesGrid');
+            let epHTML = '';
+            for (let i = 1; i <= series.episodesCount; i++) {
+                epHTML += `
+                    <button onclick="playEpisode(${i})" class="ep-btn px-3 py-2 rounded-xl bg-brand-dark hover:bg-brand-purple border border-brand-border text-xs font-bold text-gray-200 transition text-center flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-play text-[10px] text-brand-purpleLight"></i> الحلقة ${i}
+                    </button>
+                `;
+            }
+            episodesGrid.innerHTML = epHTML;
+
+            // Play Episode 1 by default
+            playEpisode(1);
+
+            document.getElementById('seriesModal').classList.remove('hidden');
+        }
+
+        function closeSeriesModal() {
+            const player = document.getElementById('episodeVideoPlayer');
+            player.pause();
+            document.getElementById('seriesModal').classList.add('hidden');
+        }
+
+        function playEpisode(epNum) {
+            document.getElementById('currentPlayingEpisodeTitle').innerHTML = `
+                <i class="fa-solid fa-play text-brand-purpleLight"></i> جاري تشغيل: ${currentSeriesModal.title} - الحلقة ${epNum}
+            `;
+            const player = document.getElementById('episodeVideoPlayer');
+            const source = document.getElementById('episodeVideoSource');
+            
+            source.src = currentSeriesModal.sampleStream;
+            player.load();
+            player.play().catch(e => console.log("Autoplay video prevented"));
+        }
+
+        /* ==========================================================================
+           FAVORITES SYSTEM (LOCAL STORAGE)
+           ========================================================================== */
+        function toggleFavorite(id) {
+            const index = favoritesList.findIndex(fav => fav.id === id);
+            if (index > -1) {
+                favoritesList.splice(index, 1);
+            } else {
+                const item = seriesDatabase.find(s => s.id === id);
+                if (item) favoritesList.push(item);
+            }
+
+            localStorage.setItem('shashaty_favorites', JSON.stringify(favoritesList));
+            updateFavCountBadge();
+            renderAllSections();
+        }
+
+        function updateFavCountBadge() {
+            document.getElementById('favCount').textContent = favoritesList.length;
+        }
+
+        function toggleFavoritesModal() {
+            const modal = document.getElementById('favModal');
+            const container = document.getElementById('favListContainer');
+
+            if (modal.classList.contains('hidden')) {
+                if (favoritesList.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-2 py-8 text-center text-gray-400">
+                            لا يوجد مسلسلات في المفضلة حالياً.
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = favoritesList.map(item => `
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-brand-dark border border-brand-border">
+                            <div class="flex items-center gap-3">
+                                <img src="${item.poster}" class="w-12 h-16 object-cover rounded-lg">
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">${item.title}</h4>
+                                    <p class="text-xs text-gray-400">${item.categoryLabel}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="openSeriesModal('${item.id}'); toggleFavoritesModal();" class="p-2 bg-brand-purple text-white rounded-lg text-xs font-bold">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <button onclick="toggleFavorite('${item.id}'); toggleFavoritesModal();" class="p-2 bg-red-600/20 text-red-500 rounded-lg text-xs font-bold">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
